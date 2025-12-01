@@ -14,7 +14,7 @@ L82";
 const INPUT: &str = include_str!("input");
 
 fn main() {
-    let rotations: Vec<Rotation> = INPUT.lines().map(|line| line.parse().unwrap()).collect();
+    let rotations: Vec<Rotation> = EXAMPLE.lines().map(|line| line.parse().unwrap()).collect();
 
     let mut times_in_went_to_zero = 0;
     let mut state = 50;
@@ -59,10 +59,8 @@ fn pass_by_0(state: i16, rotation: Rotation) -> (i16, i16) {
         Rotation::R(value) => {
             let overflowing = state + value;
             let new_position = overflowing.rem_euclid(100);
-            if overflowing > 100 {
+            if overflowing >= 100 {
                 return (new_position, overflowing.div_euclid(100));
-            } else if overflowing == 100 {
-                return (new_position, 1);
             }
             (new_position, 0)
         }
@@ -70,7 +68,7 @@ fn pass_by_0(state: i16, rotation: Rotation) -> (i16, i16) {
             let overflowing = state - value;
 
             let new_position = overflowing.rem_euclid(100);
-            if state == 0 && dbg!(overflowing) > -100 {
+            if state == 0 && overflowing > -100 {
                 return (new_position, 0);
             } else if overflowing < 0 {
                 return (new_position, overflowing.div_euclid(100).abs());
