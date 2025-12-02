@@ -14,7 +14,8 @@ fn main() {
 
     println!("day1: {sum}");
 
-    let sum: u64 = EXAMPLE
+    let sum: u64 = include_str!("input")
+        .trim()
         .split(",")
         .map(|line| line.parse().unwrap())
         .map(|range: IdRange| {
@@ -106,25 +107,23 @@ fn is_invalid(i: u64) -> bool {
 }
 
 fn is_invalid_part2(i: u64) -> bool {
-    return search_pattern(i, 1);
-}
-
-fn search_pattern(i: u64, size: usize) -> bool {
-    let stringified = i.to_string();
-    let needle = &i.to_string()[..size];
-
-    for window in ((size)..stringified.len()).step_by(size) {
-        let Some(current_needle) = stringified.get(window..window + size) else {
-            return false;
-        };
-        if needle == current_needle {
+    let s = i.to_string();
+    let len = s.len();
+    for seq_len in 1..=(len / 2) {
+        if len % seq_len != 0 {
             continue;
         }
-        return if size >= stringified.len().div_euclid(2) {
-            false
-        } else {
-            search_pattern(i, size + 1)
-        };
+        let pattern = &s[..seq_len];
+        let mut is_valid = true;
+        for j in (seq_len..len).step_by(seq_len) {
+            if &s[j..j + seq_len] != pattern {
+                is_valid = false;
+                break;
+            }
+        }
+        if is_valid {
+            return true;
+        }
     }
-    return true;
+    false
 }
