@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{ops::Rem, str::FromStr};
 
 const EXAMPLE: &str = "L68
 L30
@@ -19,12 +19,24 @@ fn main() {
     let mut times_in_went_to_zero = 0;
     let mut state = 50;
     for rotation in rotations {
-        let output = pass_by_0(state, rotation);
-        state = output.0;
-        times_in_went_to_zero += output.1;
+        state = rotate(state, rotation);
+        if state == 0 {
+            times_in_went_to_zero += 1;
+        }
     }
 
-    println!("{:?}", times_in_went_to_zero)
+    let rotations: Vec<Rotation> = EXAMPLE.lines().map(|line| line.parse().unwrap()).collect();
+
+    let mut nb0 = 0;
+    let mut state = 50;
+    for rotation in rotations {
+        let output = pass_by_0(state, rotation);
+        state = output.0;
+        nb0 += output.1;
+    }
+
+    println!("Part1: {}", times_in_went_to_zero);
+    println!("Part2: {}", nb0);
 }
 
 fn rotate(state: i16, rotation: Rotation) -> i16 {
@@ -57,25 +69,18 @@ impl FromStr for Rotation {
 fn pass_by_0(state: i16, rotation: Rotation) -> (i16, i16) {
     match rotation {
         Rotation::R(value) => {
-            let overflowing = state + value;
-            let new_position = overflowing.rem_euclid(100);
-            if overflowing >= 100 {
-                return (new_position, overflowing.div_euclid(100));
-            }
-            (new_position, 0)
+            let new_state = state + value;
+            (new_state.rem(100), new_state.div_euclid(100))
         }
         Rotation::L(value) => {
-            let overflowing = state - value;
-
-            let new_position = overflowing.rem_euclid(100);
-            if state == 0 && overflowing > -100 {
-                return (new_position, 0);
-            } else if overflowing < 0 {
-                return (new_position, overflowing.div_euclid(100).abs());
-            } else if overflowing == 0 {
-                return (new_position, 1);
+            let new_state = state - value;
+            if new_state == 0 {
+                return (new_state, 1 + new_state.div_euclid(-100));
             }
-            (new_position, 0)
+            if state == 0 {
+                return (new_state.rem_euclid(100), new_state.div_euclid(-100) - 1);
+            }
+            (new_state.rem_euclid(100), new_state.div_euclid(-100))
         }
     }
 }
